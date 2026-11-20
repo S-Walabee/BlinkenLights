@@ -44,6 +44,24 @@ The project signs with a *Developer ID Application* certificate (team set in
 `project.yml`). To build with your own team, change `DEVELOPMENT_TEAM`, or set
 `CODE_SIGN_IDENTITY=-` for an ad-hoc local build.
 
+## Release (notarized DMG)
+
+`scripts/release.sh` builds the app and signs it with a hardened runtime and a
+secure timestamp. It notarizes and staples the app, then wraps it in a DMG and
+signs, notarizes and staples that too. The result is
+`build/release/BlinkenLights-<version>.dmg`.
+
+```sh
+# one-time: store App Store Connect API key credentials in the keychain
+xcrun notarytool store-credentials BlinkenLights-notary \
+  --key ~/.appstoreconnect/private_keys/AuthKey_<KEYID>.p8 --key-id <KEYID> --issuer <ISSUER-UUID>
+
+scripts/release.sh                       # build + notarize
+scripts/release.sh "/path/to/share"      # ...and copy the DMG there
+```
+
+Override the profile or signing identity with `NOTARY_PROFILE` / `SIGN_IDENTITY`.
+
 ## License
 
 MIT
