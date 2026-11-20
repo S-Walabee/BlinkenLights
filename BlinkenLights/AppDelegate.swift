@@ -32,9 +32,13 @@ final class MenuHostingView<Content: View>: NSHostingView<Content> {
         if event.modifierFlags.contains(.control) {
             showMenu(event)
         } else {
-            super.mouseDown(with: event)
+            // SwiftUI consumes mouse-downs, so isMovableByWindowBackground never
+            // kicks in; drag the window ourselves (nothing in the panel is clickable).
+            window?.performDrag(with: event)
         }
     }
+
+    override var mouseDownCanMoveWindow: Bool { true }
 
     private func showMenu(_ event: NSEvent) {
         guard let menu else { return }
