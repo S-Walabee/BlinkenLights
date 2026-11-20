@@ -21,6 +21,27 @@ final class FloatingPanel: NSPanel {
     override var canBecomeMain: Bool { false }
 }
 
+/// SwiftUI's hosting view swallows right-clicks instead of showing `menu`,
+/// so pop the context menu up explicitly.
+final class MenuHostingView<Content: View>: NSHostingView<Content> {
+    override func rightMouseDown(with event: NSEvent) {
+        showMenu(event)
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        if event.modifierFlags.contains(.control) {
+            showMenu(event)
+        } else {
+            super.mouseDown(with: event)
+        }
+    }
+
+    private func showMenu(_ event: NSEvent) {
+        guard let menu else { return }
+        NSMenu.popUpContextMenu(menu, with: event, for: self)
+    }
+}
+
 @main
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDelegate {
@@ -50,7 +71,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWind
         let root = ContentView(monitor: monitor, settings: settings) { [weak self] size in
             self?.fitPanel(to: size)
         }
-        let hosting = NSHostingView(rootView: root)
+        let hosting = MenuHostingView(rootView: root)
         hosting.sizingOptions = []
         menu.delegate = self
         hosting.menu = menu
