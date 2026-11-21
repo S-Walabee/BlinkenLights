@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><!-- BlinkenLights app icon, concept 1: the floating panel, three volumes with read and write lights --><defs>
+  <linearGradient id="body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2c2d36"/><stop offset="1" stop-color="#121317"/></linearGradient>
+  <radialGradient id="warm" cx=".78" cy=".08" r=".75"><stop offset="0" stop-color="#ffb140" stop-opacity=".22"/><stop offset="1" stop-color="#ffb140" stop-opacity="0"/></radialGradient>
+  <linearGradient id="beige" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6f2ea"/><stop offset="1" stop-color="#d9d2c4"/></linearGradient>
+  <filter id="glow" x="-1" y="-1" width="3" height="3"><feGaussianBlur stdDeviation="14"/></filter>
+  <filter id="shadow" x="-.2" y="-.2" width="1.4" height="1.4"><feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#000" flood-opacity=".35"/></filter>
+</defs><g filter="url(#shadow)"><rect x="100" y="100" width="824" height="824" rx="185" fill="url(#body)"/></g>
+<rect x="100" y="100" width="824" height="824" rx="185" fill="url(#warm)"/>
+<rect x="101.5" y="101.5" width="821" height="821" rx="183.5" fill="none" stroke="#fff" stroke-opacity=".08" stroke-width="3"/>
+<rect x="214" y="262" width="596" height="500" rx="64" fill="#0c0d10" stroke="#f2eee8" stroke-opacity=".16" stroke-width="6"/>
+<circle cx="300" cy="368" r="45.9" fill="#3fd8a8" opacity=".55" filter="url(#glow)"/><circle cx="300" cy="368" r="34" fill="#3fd8a8"/><circle cx="289.8" cy="356.1" r="9.5" fill="#fff" opacity="0.4"/>
+<circle cx="392" cy="368" r="34" fill="#3d1b19" stroke="#fff" stroke-opacity=".07" stroke-width="3"/><circle cx="381.8" cy="356.1" r="9.5" fill="#fff" opacity="0.12"/>
+<rect x="460" y="351" width="300" height="34" rx="17" fill="#f2eee8" opacity=".85"/>
+<circle cx="300" cy="512" r="34" fill="#173a30" stroke="#fff" stroke-opacity=".07" stroke-width="3"/><circle cx="289.8" cy="500.1" r="9.5" fill="#fff" opacity="0.12"/>
+<circle cx="392" cy="512" r="45.9" fill="#ff6b5e" opacity=".55" filter="url(#glow)"/><circle cx="392" cy="512" r="34" fill="#ff6b5e"/><circle cx="381.8" cy="500.1" r="9.5" fill="#fff" opacity="0.4"/>
+<rect x="460" y="495" width="220" height="34" rx="17" fill="#f2eee8" opacity=".85"/>
+<circle cx="300" cy="656" r="45.9" fill="#3fd8a8" opacity=".55" filter="url(#glow)"/><circle cx="300" cy="656" r="34" fill="#3fd8a8"/><circle cx="289.8" cy="644.1" r="9.5" fill="#fff" opacity="0.4"/>
+<circle cx="392" cy="656" r="45.9" fill="#ff6b5e" opacity=".55" filter="url(#glow)"/><circle cx="392" cy="656" r="34" fill="#ff6b5e"/><circle cx="381.8" cy="644.1" r="9.5" fill="#fff" opacity="0.4"/>
+<rect x="460" y="639" width="260" height="34" rx="17" fill="#f2eee8" opacity=".85"/>
+</svg>
