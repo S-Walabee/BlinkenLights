@@ -39,10 +39,17 @@ echo "== Build"
 if command -v xcodegen >/dev/null; then
   (cd "$REPO" && xcodegen generate --quiet)
 fi
+# A generic destination builds every architecture; without it, xcodebuild picks
+# this Mac and builds only its own (an Apple silicon-only app won't open on Intel).
 xcodebuild -project "$REPO/BlinkenLights.xcodeproj" -scheme BlinkenLights -configuration Release \
-  -derivedDataPath "$WORK/dd" build 2>&1 | grep -E "error|BUILD SUCCEEDED|BUILD FAILED" | sort -u
+  -destination 'generic/platform=macOS' -derivedDataPath "$WORK/dd" build 2>&1 | grep -E "error|BUILD SUCCEEDED|BUILD FAILED" | sort -u
 BUILT="$WORK/dd/Build/Products/Release/BlinkenLights.app"
 [ -d "$BUILT" ] || { echo "Build failed" >&2; exit 1; }
+ARCHS_BUILT=$(lipo -archs "$BUILT/Contents/MacOS/BlinkenLights")
+case "$ARCHS_BUILT" in
+  *arm64*x86_64*|*x86_64*arm64*) echo "== Universal: $ARCHS_BUILT" ;;
+  *) echo "Not universal (built: $ARCHS_BUILT); refusing to release" >&2; exit 1 ;;
+esac
 VERSION=$(defaults read "$BUILT/Contents/Info" CFBundleShortVersionString)
 
 mkdir -p "$WORK/stage"
