@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		31670A7D0ECC2E4A4C66FE17 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 732284F48D10879391E4DC72 /* Assets.xcassets */; };
 		3E83167DA859D62757DD39EE /* DiskStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A2C5D1BCFA49F676CA4CB4 /* DiskStats.swift */; };
 		58EAE33E4B7F02EEF23796E3 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3596CF6B124A159C3C03B0FB /* Settings.swift */; };
 		6B46BB44492351786C548AE9 /* VolumeMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 299DE76BD5D806F771679BB1 /* VolumeMonitor.swift */; };
@@ -21,6 +22,7 @@
 		299DE76BD5D806F771679BB1 /* VolumeMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeMonitor.swift; sourceTree = "<group>"; };
 		3596CF6B124A159C3C03B0FB /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		412871EE689F443BFC16EA95 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		732284F48D10879391E4DC72 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8A7714D444545B1919A69DE0 /* NetworkStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkStats.swift; sourceTree = "<group>"; };
 		A32819579FBBFE46ECBDF1E2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		BDEA020760DFE5FAF396A7BC /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -39,6 +41,7 @@
 			isa = PBXGroup;
 			children = (
 				412871EE689F443BFC16EA95 /* AppDelegate.swift */,
+				732284F48D10879391E4DC72 /* Assets.xcassets */,
 				BDEA020760DFE5FAF396A7BC /* ContentView.swift */,
 				02A2C5D1BCFA49F676CA4CB4 /* DiskStats.swift */,
 				A32819579FBBFE46ECBDF1E2 /* Info.plist */,
@@ -65,6 +68,7 @@
 			buildConfigurationList = 07D15F7BB47B9C77B5E7D1C4 /* Build configuration list for PBXNativeTarget "BlinkenLights" */;
 			buildPhases = (
 				6C4CD6D58DC30644464EE2E3 /* Sources */,
+				D0E3D2628DC8125348827014 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -110,6 +114,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D0E3D2628DC8125348827014 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				31670A7D0ECC2E4A4C66FE17 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		6C4CD6D58DC30644464EE2E3 /* Sources */ = {
