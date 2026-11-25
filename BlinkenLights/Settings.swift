@@ -18,6 +18,8 @@ final class AppSettings {
     /// Background opacity, 0 (fully transparent) ... 1 (opaque).
     var backgroundOpacity: Double { didSet { defaults.set(backgroundOpacity, forKey: "backgroundOpacity") } }
     var updateInterval: Double { didSet { defaults.set(updateInterval, forKey: "updateInterval") } }
+    /// Show each volume's free space as a percentage beside its name.
+    var showFreeSpace: Bool { didSet { defaults.set(showFreeSpace, forKey: "showFreeSpace") } }
 
     private init() {
         defaults.register(defaults: [
@@ -25,11 +27,13 @@ final class AppSettings {
             "alwaysVisible": true,
             "backgroundOpacity": 0.75,
             "updateInterval": 0.5,
+            "showFreeSpace": true,
         ])
         isVertical = defaults.bool(forKey: "isVertical")
         alwaysVisible = defaults.bool(forKey: "alwaysVisible")
         backgroundOpacity = defaults.double(forKey: "backgroundOpacity")
         updateInterval = defaults.double(forKey: "updateInterval")
+        showFreeSpace = defaults.bool(forKey: "showFreeSpace")
     }
 
     // MARK: Launch at login
