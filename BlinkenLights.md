@@ -16,6 +16,12 @@ volume's human-friendly name.
 - **Labels:** show only the friendly volume name as seen in Finder (e.g.
   "Macintosh SSD", "Qwiizlab", "AI Models", "Unit One"). No device-name
   (`disk3s1`) option.
+- **Free space:** after the name, a dimmed percentage of free space (e.g.
+  "37%"), right-aligned in a column in the vertical layout. The tooltip adds
+  the amounts ("1.92 TB free of 4 TB (48%)"). Read-only volumes (optical
+  discs, mounted disc images) show no percentage — they are always "full" —
+  except the boot volume `/`, whose sealed system snapshot is read-only but
+  whose APFS container is not.
 - **Which volumes:** the boot volume plus every browsable volume under
   `/Volumes` (internal, external, disk images, optical). Skip hidden/system
   (`nobrowse`) volumes such as Recovery, Preboot and VM.
@@ -46,6 +52,7 @@ instead:
 - Always Visible: floats above all other windows when on; normal level when off
 - Background Opacity: a slider from fully transparent to opaque; the LEDs and
   text stay fully visible
+- Show Free Space toggle, on by default
 - Update Speed submenu
 - Launch at Login (`SMAppService.mainApp`), on by default at first run
 - Quit
@@ -75,6 +82,13 @@ instead:
      - Read = at least 2 KB in per tick.
      - Write = at least 2 KB out *and* more out than in. Directory listings send
        many small requests and would otherwise light the write LED.
+- **Free space:** measure every 5 s (and right after a mount change) on a
+  background task, one batch at a time, because `statfs` on a dead network
+  server blocks. Local volumes: `URLResourceValues`
+  `volumeAvailableCapacityForImportantUsage` / `volumeTotalCapacity` (fresh
+  `URL` each time to avoid cached values), which matches Finder by counting
+  purgeable space; fall back to `statfs` `f_bavail` / `f_blocks`. Network
+  shares: `statfs`.
 - **Mount discovery:** use `getmntinfo(MNT_NOWAIT)` so a dead server can never
   block the UI. Rescan on `NSWorkspace` mount, unmount and rename
   notifications, plus every ~5 s as a safety net.

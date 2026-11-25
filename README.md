@@ -9,11 +9,14 @@ volume — local disks, external drives, disk images and network shares — with
 ## Features
 
 - One entry per mounted volume, labelled with its Finder name
+- Free space shown as a percentage beside each volume (hover for GB free of total);
+  read-only volumes such as DVDs show none
 - Network shares (SMB / NFS / AFP) appear when mounted and disappear when unmounted
 - Borderless, draggable panel on every Space (including full-screen apps); no Dock icon or menu bar
 - Right-click menu:
   - Vertical / Horizontal layout
   - Always Visible (float above other windows)
+  - Show Free Space (on by default)
   - Background opacity slider
   - Update speed (100 ms – 2 s, default 500 ms)
   - Launch at Login
@@ -27,6 +30,8 @@ volume — local disks, external drives, disk images and network shares — with
 - **Network shares:** file-sharing traffic belongs to the kernel, so BlinkenLights reads
   per-connection byte counters for `kernel_task` from `nettop`. It matches them to each
   share's server: bytes in light the read LED, bytes out light the write LED.
+- **Free space:** measured every 5 s off the main thread. Local volumes use the same
+  "available" figure as Finder (including purgeable space); network shares use `statfs`.
 
 ## Build
 

@@ -24,10 +24,11 @@ struct LEDView: View {
     }
 }
 
-/// Read (green) and write (red) LEDs plus the volume's name.
+/// Read (green) and write (red) LEDs plus the volume's name and free space.
 struct VolumeView: View {
     let volume: VolumeState
     let vertical: Bool
+    let showFreeSpace: Bool
 
     var body: some View {
         HStack(spacing: 4) {
@@ -39,9 +40,29 @@ struct VolumeView: View {
                 .shadow(color: .black.opacity(0.8), radius: 1)
                 .lineLimit(1)
                 .padding(.leading, 2)
-                .help(volume.isNetwork ? "\(volume.name) (network share)" : volume.name)
+            if showFreeSpace, let percent = volume.freePercent {
+                if vertical { Spacer(minLength: 8) }   // line the percentages up in a column
+                Text("\(percent)%")
+                    .font(.system(size: 10, weight: .medium).monospacedDigit())
+                    .foregroundStyle(.white.opacity(0.65))
+                    .shadow(color: .black.opacity(0.8), radius: 1)
+                    .lineLimit(1)
+            }
         }
         .frame(maxWidth: vertical ? .infinity : nil, alignment: .leading)
+        .contentShape(Rectangle())
+        .help(helpText)
+    }
+
+    private var helpText: String {
+        var text = volume.isNetwork ? "\(volume.name) (network share)" : volume.name
+        if let capacity = volume.capacity, let percent = volume.freePercent {
+            let format = ByteCountFormatter()
+            format.countStyle = .file
+            text += "\n\(format.string(fromByteCount: capacity.free)) free of "
+                + "\(format.string(fromByteCount: capacity.total)) (\(percent)%)"
+        }
+        return text
     }
 }
 
@@ -75,7 +96,7 @@ struct ContentView: View {
             Text("No volumes").font(.system(size: 11)).foregroundStyle(.secondary)
         }
         ForEach(monitor.volumes) { volume in
-            VolumeView(volume: volume, vertical: settings.isVertical)
+            VolumeView(volume: volume, vertical: settings.isVertical, showFreeSpace: settings.showFreeSpace)
         }
     }
 }

@@ -8,6 +8,39 @@ struct VolumeState: Identifiable, Equatable {
     let isNetwork: Bool
     var reading = false
     var writing = false
+    var capacity: VolumeCapacity?
+
+    /// Free space as a whole percentage of the volume's size.
+    var freePercent: Int? {
+        guard let capacity, capacity.total > 0 else { return nil }
+        return Int((Double(capacity.free) / Double(capacity.total) * 100).rounded())
+    }
+}
+
+/// A volume's size and the space still available on it, in bytes.
+struct VolumeCapacity: Equatable, Sendable {
+    let free: Int64
+    let total: Int64
+
+    /// Measures a mounted volume. Can block on an unresponsive network
+    /// server, so only call it off the main thread.
+    static func measure(mountPoint: String, isLocal: Bool) -> VolumeCapacity? {
+        if isLocal {
+            // Match Finder's "Available", which counts purgeable space (caches,
+            // local snapshots) as free. A fresh URL each time skips cached values.
+            let url = URL(fileURLWithPath: mountPoint, isDirectory: true)
+            if let values = try? url.resourceValues(forKeys: [.volumeTotalCapacityKey,
+                                                               .volumeAvailableCapacityForImportantUsageKey]),
+               let total = values.volumeTotalCapacity, total > 0,
+               let free = values.volumeAvailableCapacityForImportantUsage, free > 0 {
+                return VolumeCapacity(free: min(free, Int64(total)), total: Int64(total))
+            }
+        }
+        var fs = statfs()
+        guard statfs(mountPoint, &fs) == 0, fs.f_blocks > 0 else { return nil }
+        let blockSize = Int64(fs.f_bsize)
+        return VolumeCapacity(free: Int64(fs.f_bavail) * blockSize, total: Int64(fs.f_blocks) * blockSize)
+    }
 }
 
 /// A mounted, user-visible volume and how to measure its activity.
@@ -16,6 +49,7 @@ private struct MountedVolume: Equatable {
     let name: String
     let bsdName: String?    // local volumes
     let server: String?     // network volumes
+    let isReadOnly: Bool    // e.g. optical discs, which are always "full"
 }
 
 /// Tracks mounted volumes and polls their read/write activity.
@@ -34,6 +68,12 @@ final class VolumeMonitor {
     @ObservationIgnored private var timer: Timer?
     @ObservationIgnored private var ticksSinceRescan = 0
     @ObservationIgnored private var rootName: String?
+    @ObservationIgnored private var capacities: [String: VolumeCapacity] = [:]
+    @ObservationIgnored private var capacitySampleInFlight = false
+    @ObservationIgnored private var lastCapacitySample = Date.distantPast
+
+    /// How often to re-measure free space; it changes slowly.
+    private let capacityInterval: TimeInterval = 5
 
     /// Bytes per sample a network connection must move to count as activity
     /// (filters out SMB keep-alives and similar chatter).
@@ -83,12 +123,16 @@ final class VolumeMonitor {
                 found.append(MountedVolume(mountPoint: mountPoint,
                                            name: displayName(for: mountPoint),
                                            bsdName: String(source.dropFirst(5)),
-                                           server: nil))
+                                           server: nil,
+                                           // "/" is the sealed, read-only system snapshot,
+                                           // but its container's free space still matters.
+                                           isReadOnly: mountPoint != "/" && flags & MNT_RDONLY != 0))
             } else if let server = Self.serverName(fromMountSource: source) {
                 found.append(MountedVolume(mountPoint: mountPoint,
                                            name: displayName(for: mountPoint),
                                            bsdName: nil,
-                                           server: server))
+                                           server: server,
+                                           isReadOnly: flags & MNT_RDONLY != 0))
             }
         }
 
@@ -104,13 +148,49 @@ final class VolumeMonitor {
         diskStats.forgetCache()
         let old = Dictionary(volumes.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
         volumes = found.map { v in
-            var state = VolumeState(id: v.mountPoint, name: v.name, isNetwork: v.server != nil)
+            var state = VolumeState(id: v.mountPoint, name: v.name, isNetwork: v.server != nil,
+                                    capacity: capacities[v.mountPoint])
             if let previous = old[v.mountPoint] {
                 state.reading = previous.reading
                 state.writing = previous.writing
             }
             return state
         }
+        lastCapacitySample = .distantPast   // measure newly mounted volumes right away
+        sampleCapacitiesIfDue()
+    }
+
+    // MARK: Free space
+
+    /// Measures every volume's free space off the main thread, at most every
+    /// `capacityInterval` seconds and never more than one batch at a time, so
+    /// a hung network server can only stall its own measurement.
+    private func sampleCapacitiesIfDue() {
+        guard !capacitySampleInFlight, !mounted.isEmpty,
+              Date().timeIntervalSince(lastCapacitySample) >= capacityInterval else { return }
+        capacitySampleInFlight = true
+        lastCapacitySample = Date()
+        let targets = mounted.filter { !$0.isReadOnly }
+            .map { (mountPoint: $0.mountPoint, isLocal: $0.server == nil) }
+        Task.detached(priority: .utility) {
+            var result: [String: VolumeCapacity] = [:]
+            for target in targets {
+                result[target.mountPoint] = VolumeCapacity.measure(mountPoint: target.mountPoint,
+                                                                   isLocal: target.isLocal)
+            }
+            let measured = result
+            await MainActor.run { self.applyCapacities(measured) }
+        }
+    }
+
+    private func applyCapacities(_ result: [String: VolumeCapacity]) {
+        capacitySampleInFlight = false
+        capacities = result
+        var updated = volumes
+        for index in updated.indices {
+            updated[index].capacity = result[updated[index].id]
+        }
+        if updated != volumes { volumes = updated }
     }
 
     private func displayName(for mountPoint: String) -> String {
@@ -155,6 +235,7 @@ final class VolumeMonitor {
             ticksSinceRescan = 0
             rescan()   // safety net in case a mount/unmount notification is missed
         }
+        sampleCapacitiesIfDue()
 
         // Local disks: one IOKit read per storage driver.
         var diskActivity: [UInt64: (read: Bool, write: Bool)] = [:]

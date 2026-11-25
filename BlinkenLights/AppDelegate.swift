@@ -148,6 +148,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWind
         always.state = settings.alwaysVisible ? .on : .off
         menu.addItem(always)
 
+        let freeSpace = item("Show Free Space", #selector(toggleShowFreeSpace))
+        freeSpace.state = settings.showFreeSpace ? .on : .off
+        menu.addItem(freeSpace)
+
         menu.addItem(.separator())
 
         let header = NSMenuItem(title: "Background Opacity", action: nil, keyEquivalent: "")
@@ -203,6 +207,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWind
         settings.alwaysVisible.toggle()
         applyAlwaysVisible()
     }
+
+    @objc private func toggleShowFreeSpace() { settings.showFreeSpace.toggle() }
 
     @objc private func opacityChanged(_ sender: NSSlider) {
         settings.backgroundOpacity = sender.doubleValue
